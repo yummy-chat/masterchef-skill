@@ -25,18 +25,14 @@ npx skills add yummy-chat/masterchef-skill
 
 ### 方式 2：通过 SkillHub（供 Agent 使用）
 
-**检查是否已安装 SkillHub：**
 ```bash
+# 检查是否已安装 SkillHub
 skillhub --version
-```
 
-**若未安装**，请先安装 SkillHub CLI（仅 CLI，无 GUI）：
-```bash
+# 若未安装，请先安装 SkillHub CLI（仅 CLI，无 GUI）
 curl -fsSL https://skillhub.cn/install/skillhub.md | bash
-```
 
-**然后安装 masterchef 技能：**
-```bash
+# 然后安装 masterchef 技能
 skillhub install masterchef
 ```
 
