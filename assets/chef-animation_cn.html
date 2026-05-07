@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=1920, height=1080">
+<title>MasterChef Skill Animation</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@600;900&family=Noto+Sans+SC:wght@400;500;700&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+@font-face { font-family: 'MuYao'; src: url('muyao-handwriting.ttf') format('truetype'); }
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { background: #FBF7F0; overflow: hidden; font-family: 'Noto Sans SC', sans-serif; }
+
+.scene { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.4s ease; pointer-events: none; }
+.scene.active { opacity: 1; }
+
+/* ━━━ Scene 1: Typing ━━━ */
+#s1 { flex-direction: column; align-items: center; justify-content: center; }
+#s1 .typing-wrap {
+  display: flex; align-items: center; justify-content: center;
+  opacity: 0;
+  transition: opacity 0.4s ease;
+}
+#s1.on .typing-wrap { opacity: 1; }
+#s1 .typing-text {
+  font-family: 'Noto Sans SC', sans-serif;
+  font-size: 130px; font-weight: 700; color: #2C1810;
+  line-height: 1.3; white-space: nowrap;
+  border-right: 6px solid #C04A1A;
+  padding-right: 8px;
+  animation: blink-cursor 0.8s step-end infinite;
+}
+@keyframes blink-cursor { 0%,50% { border-color: #C04A1A; } 51%,100% { border-color: transparent; } }
+#s1 .typing-sub {
+  font-family: 'Noto Sans SC', sans-serif;
+  font-size: 36px; font-weight: 600; color: #8B7355;
+  margin-top: 40px;
+  opacity: 0; transform: translateY(20px);
+  transition: opacity 0.6s ease, transform 0.6s ease;
+}
+#s1.on .typing-sub { opacity: 1; transform: translateY(0); transition-delay: 1s; }
+
+/* ━━━ Scene 2: Cuisine Categories (scrolling) ━━━ */
+#s2 { flex-direction: column; padding: 40px 80px; overflow: hidden; }
+#s2 .grid-title { font-size: 24px; font-weight: 700; color: #2C1810; margin-bottom: 24px; text-align: center; opacity: 0; transition: opacity 0.5s ease; flex-shrink: 0; }
+#s2.on .grid-title { opacity: 1; }
+#s2 .cats-wrap { display: grid; grid-template-columns: repeat(6, 1fr); gap: 24px; width: 100%; flex-shrink: 0; }
+.cat-col {}
+.cat-col .cat-name { font-size: 16px; font-weight: 700; color: #C04A1A; margin-bottom: 10px; padding-bottom: 6px; border-bottom: 2px solid #C04A1A; text-align: center; opacity: 0; transition: opacity 0.4s ease; }
+#s2.on .cat-name { opacity: 1; }
+.cat-col .cat-count { font-size: 12px; color: #8B7355; text-align: center; margin-bottom: 10px; opacity: 0; transition: opacity 0.4s ease 0.1s; }
+#s2.on .cat-count { opacity: 1; }
+.cat-col .dish-list { display: flex; flex-direction: column; gap: 6px; overflow: hidden; height: 680px; }
+.cat-col .dish-list-inner { display: flex; flex-direction: column; gap: 6px; }
+.cat-col .dish-item { font-size: 15px; font-weight: 400; padding: 6px 12px; border-radius: 8px; background: #F5EDE3; color: #2C1810; text-align: center; white-space: nowrap; }
+
+/* ━━━ Scene 3: Ingredient Search ━━━ */
+#s3 { gap: 80px; }
+.panel { background: #fff; border-radius: 16px; padding: 28px 36px; box-shadow: 0 4px 24px rgba(0,0,0,0.08); border: 2px solid #E8DDD0; opacity: 0; transform: translateX(30px); transition: opacity 0.5s ease, transform 0.5s ease; }
+.panel-left { transform: translateX(-30px); }
+#s3.on .panel { opacity: 1; transform: translateX(0); }
+.panel .label { font-size: 18px; font-weight: 500; color: #8B7355; margin-bottom: 16px; }
+.panel .query { font-size: 26px; color: #2C1810; }
+.panel .query em { color: #C04A1A; font-weight: 700; font-style: normal; }
+.result-item { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #E8DDD0; opacity: 0; transform: translateX(15px); transition: opacity 0.4s ease, transform 0.4s ease; }
+.result-item:last-child { border-bottom: none; }
+#s3.on .result-item { opacity: 1; transform: translateX(0); }
+.result-item .name { font-size: 20px; font-weight: 500; }
+.result-item .name.hl { color: #C04A1A; font-weight: 700; }
+.result-item .tag { font-size: 13px; padding: 4px 12px; border-radius: 20px; background: #E6D5C3; color: #8B7355; }
+.result-item .tag.hl { background: #C04A1A20; color: #C04A1A; }
+.arrow { font-size: 48px; color: #C04A1A; opacity: 0; transition: opacity 0.5s ease 0.15s; }
+#s3.on .arrow { opacity: 1; }
+
+/* ━━━ Scene 4: Full Recipe (scrolling) ━━━ */
+#s4 { }
+#s4 .recipe-frame { background: #fff; border-radius: 20px; padding: 0; box-shadow: 0 8px 40px rgba(0,0,0,0.1); border: 2px solid #E8DDD0; width: 860px; height: 860px; overflow: hidden; position: relative; }
+#s4 .recipe-scroll { padding: 48px 52px; overflow-y: auto; height: 100%; }
+#s4 .recipe-scroll::-webkit-scrollbar { width: 6px; }
+#s4 .recipe-scroll::-webkit-scrollbar-thumb { background: #D4C4B0; border-radius: 3px; }
+#s4 .recipe-scroll::-webkit-scrollbar-track { background: transparent; }
+#s4 .r-title { font-family: 'Noto Serif SC', serif; font-size: 36px; font-weight: 900; color: #2C1810; margin-bottom: 8px; }
+#s4 .r-meta { font-size: 15px; color: #8B7355; margin-bottom: 28px; }
+#s4 .r-section { font-size: 20px; font-weight: 700; color: #C04A1A; margin: 28px 0 14px; padding-bottom: 8px; border-bottom: 1px solid #E8DDD0; }
+#s4 .r-ingredient { font-size: 15px; color: #2C1810; padding: 5px 0; line-height: 1.6; }
+#s4 .r-step { font-size: 15px; color: #2C1810; padding: 8px 0; line-height: 1.7; }
+#s4 .r-step-num { display: inline-block; background: #C04A1A; color: #fff; width: 24px; height: 24px; border-radius: 50%; text-align: center; line-height: 24px; font-size: 13px; font-weight: 700; margin-right: 10px; flex-shrink: 0; }
+#s4 .r-note { font-size: 13px; color: #8B7355; margin: 4px 0 4px 34px; font-style: italic; }
+#s4 .r-health { font-size: 14px; color: #8B7355; margin-top: 24px; padding: 16px; background: #F5EDE3; border-radius: 12px; line-height: 1.6; }
+
+/* ━━━ Scene 5: End Card ━━━ */
+#s5 { flex-direction: column; }
+#s5 .logo { font-family: 'MuYao', cursive; font-size: 88px; color: #C04A1A; margin-bottom: 24px; line-height: 1.2; transform: scale(0.8); opacity: 0; transition: transform 0.6s cubic-bezier(0.34,1.56,0.64,1), opacity 0.5s ease; }
+#s5.on .logo { transform: scale(1); opacity: 1; }
+#s5 .tagline { font-size: 28px; font-weight: 500; color: #2C1810; margin-bottom: 40px; opacity: 0; transition: opacity 0.6s ease 0.2s; }
+#s5.on .tagline { opacity: 1; }
+#s5 .install { background: #C04A1A; color: #fff; padding: 14px 32px; border-radius: 10px; font-family: 'JetBrains Mono', monospace; font-size: 16px; font-weight: 500; opacity: 0; transform: translateY(10px); transition: opacity 0.5s ease 0.35s, transform 0.5s ease 0.35s; }
+#s5.on .install { opacity: 1; transform: translateY(0); }
+#s5 .contact { font-size: 15px; color: #8B7355; margin-top: 32px; opacity: 0; transition: opacity 0.5s ease 0.5s; }
+#s5.on .contact { opacity: 1; }
+</style>
+</head>
+<body>
+
+<!-- Scene 1: Typing -->
+<div class="scene" id="s1">
+  <div class="typing-wrap">
+    <div class="typing-text" id="typing-text"></div>
+  </div>
+  <div class="typing-sub">2988 道家常菜谱 · 非AI生成</div>
+</div>
+
+<!-- Scene 2 -->
+<div class="scene" id="s2">
+  <div class="grid-title">2988道菜中，95%以上为中餐 · 涵盖各地方菜系</div>
+  <div class="cats-wrap" id="cats"></div>
+</div>
+
+<!-- Scene 3 -->
+<div class="scene" id="s3">
+  <div class="panel panel-left">
+    <div class="label">你说</div>
+    <div class="query">我有<em>茄子</em>和<em>土豆</em>，能做什么？</div>
+  </div>
+  <div class="arrow">→</div>
+  <div class="panel">
+    <div class="label">厨神</div>
+    <div id="results"></div>
+  </div>
+</div>
+
+<!-- Scene 4 -->
+<div class="scene" id="s4">
+  <div class="recipe-frame">
+    <div class="recipe-scroll" id="recipe-scroll">
+      <div class="r-title">地三鲜</div>
+      <div class="r-meta">东北菜 · 烹饪难度 ⭐⭐⭐ · 时令推荐：四季餐食</div>
+
+      <div class="r-section">食材与调味品</div>
+      <div class="r-ingredient">🍆 长茄子 350g（去根部，切滚刀块）</div>
+      <div class="r-ingredient">🥔 土豆 250g（去皮，切薄滚刀块）</div>
+      <div class="r-ingredient">🌶️ 螺丝椒 100g（切滚刀块，不吃辣可用甜椒）</div>
+      <div class="r-ingredient">🧄 蒜瓣 40g（约8粒，切成蒜末）</div>
+      <div class="r-ingredient">🧂 生抽 30g（约3勺）</div>
+      <div class="r-ingredient">🦪 蚝油 20g（约2勺）</div>
+      <div class="r-ingredient">🍯 老抽 3g（少量，提色用）</div>
+      <div class="r-ingredient">🍬 白糖 6g（2/3平勺）</div>
+      <div class="r-ingredient">🧂 味精 3g（1茶匙）</div>
+      <div class="r-ingredient">🌾 玉米淀粉 5g（半平勺，用于碗汁）</div>
+      <div class="r-ingredient">💧 清水 100g（约1/3碗）</div>
+      <div class="r-ingredient">🫒 食用油 适量（需能没过食材）</div>
+
+      <div class="r-section">制作步骤 · 准备</div>
+      <div class="r-step"><span class="r-step-num">1</span>茄子表面洒少许水打湿，少量多次加入干淀粉，边加边晃动碗，使其表面均匀裹上一层薄粉</div>
+      <div class="r-note">裹粉可有效减少茄子吸油</div>
+      <div class="r-step"><span class="r-step-num">2</span>土豆去皮切成薄滚刀块，辣椒切成滚刀块</div>
+      <div class="r-note">土豆块不宜过大，否则不易炸熟</div>
+      <div class="r-step"><span class="r-step-num">3</span>将8粒大蒜切成蒜末</div>
+      <div class="r-step"><span class="r-step-num">4</span>小碗中混合生抽、蚝油、老抽、白糖、味精、玉米淀粉和清水，搅拌均匀成碗汁备用</div>
+      <div class="r-note">玉米淀粉量需控制，防止料汁过于粘稠</div>
+
+      <div class="r-section">制作步骤 · 烹饪</div>
+      <div class="r-step"><span class="r-step-num">1</span>锅中倒油，加热至手距油面5cm有明显热感时，下入土豆块，用勺背轻推防止粘连。炸至锅内出现密集"大鱼眼泡"时，转中小火，继续炸约4分钟，至土豆金黄熟透</div>
+      <div class="r-note">关键：出现大泡后必须转中小火，避免外焦里生</div>
+      <div class="r-step"><span class="r-step-num">2</span>捞出土豆，开大火将油温升高，待油面微微冒烟时下入茄子块。茄子下锅后先静置十几秒，待外壳定型后再拨散，全程大火炸约3分钟</div>
+      <div class="r-note">关键：炸茄子需要高油温，下锅后不要立刻翻动</div>
+      <div class="r-step"><span class="r-step-num">3</span>捞出茄子后关火，利用油的余温将辣椒块下锅快速过油，立即捞出</div>
+      <div class="r-step"><span class="r-step-num">4</span>锅中留少许底油，放入1/3的蒜末，先不开火，利用锅的余温将蒜末炒香，然后倒入碗汁，开大火熬至料汁冒泡</div>
+      <div class="r-note">利用余温先激发部分蒜香</div>
+      <div class="r-step"><span class="r-step-num">5</span>料汁冒泡后，迅速倒入炸好的土豆、茄子和辣椒，快速翻炒均匀</div>
+      <div class="r-step"><span class="r-step-num">6</span>关火，撒入剩余的2/3生蒜末，简单翻拌几下即可出锅</div>
+      <div class="r-note">关键：关火后撒生蒜末，利用余热激发蒜香，这是地三鲜风味的灵魂</div>
+
+      <div class="r-section">健康建议</div>
+      <div class="r-health">茄子吸油较多，建议搭配杂粮饭或清淡汤品以平衡热量。土豆和辣椒富含维生素C和钾，适合需要补充能量的体力劳动者。注意控制炸制时间，避免产生过多丙烯酰胺。</div>
+    </div>
+  </div>
+</div>
+
+<!-- Scene 5 -->
+<div class="scene" id="s5">
+  <div class="logo">🍳 厨神.skill</div>
+  <div class="tagline">Agent 真能用得上的家常菜谱</div>
+  <div class="install">npx skills add yummy-chat/masterchef-skill</div>
+  <div class="contact">recipe@yummy.chat</div>
+</div>
+
+<script>
+// ━━━ Cuisine Data ━━━
+const CUISINES = [
+  { name: '家常菜', count: 1291, dishes: ['蛋炒饭','番茄炒蛋','土豆炖牛肉','蒜蓉西兰花','青椒肉丝','醋溜白菜','红烧茄子','溜肉段','栗子焖鸡','芝麻糊','凉拌茄子','辣子肉','土豆馅饼','黑胡椒香煎虾','咸蛋黄虾滑蛤蜊豆腐煲','粒粒分明蛋炒饭','红烧肉','糖醋排骨','宫保鸡丁','鱼香肉丝','回锅肉','酸菜鱼','水煮鱼','干煸四季豆','京酱肉丝','麻婆豆腐','可乐鸡翅','玉米排骨汤','蜜汁山药','虾仁肉馅煎饺'] },
+  { name: '粤菜', count: 319, dishes: ['清汤牛腩面','鲍鱼海鲜炒饭','微波炉双皮奶','云吞汤面','猪杂粉','港式咖喱牛腩煲','砂锅焖虾','酱油虾','隔水蒸鸡','白切鸡','煲仔饭','菠萝咕噜肉','蒸排骨','虾饺','烧鹅','叉烧包','肠粉','老火靓汤','梅菜扣肉','酿豆腐','豉油鸡','姜葱焗蟹','干炒牛河','艇仔粥','萝卜糕','马蹄糕','双皮奶','姜撞奶'] },
+  { name: '川菜', count: 246, dishes: ['鱼香肉丝','自制肥牛卷火锅','连锅汤','麻辣香锅','干煸四季豆','百香果酸菜鱼','歌乐山辣子鸡','家常肘子','水煮牛肉','毛血旺','回锅肉','泡椒凤爪','蒜泥白肉','夫妻肺片','担担面','龙抄手','钟水饺','钵钵鸡','串串香','麻婆豆腐','口水鸡','樟茶鸭','甜水面','冒菜','兔头','川北凉粉','锅巴肉片'] },
+  { name: '东北菜', count: 142, dishes: ['溜肉段','排骨炖豆角','家庭版烤肉','哈尔滨锅包肉','五花肉烤酸菜','童年麻辣串鸡骨棒','辣炖鸡汤','东北酱锅','东北溜肉段','地三鲜','小鸡炖蘑菇','猪肉炖粉条','酸菜炖白肉','铁锅炖大鹅','拔丝地瓜','酱骨架','渍菜粉','锅包肉','杀猪菜','粘豆包','酸菜饺子','东北乱炖','大拉皮','烤冷面'] },
+  { name: '陕西菜', count: 70, dishes: ['懒人凉皮','老陕烩面片','扯面蘸水面','家庭版油泼面','陕西风味豆腐脑','电饭锅版肉夹馍','素拼凉菜','陕西酥皮油糕','酿皮子','羊肉泡馍','岐山臊子面','葫芦头','biangbiang面','甑糕','荞面饸饹','水盆羊肉','粉蒸肉','洋芋擦擦','钱钱饭','陕北烩菜','千层油酥饼'] },
+  { name: '北京菜', count: 49, dishes: ['宫廷酱牛肉','牛肉炸酱面','微波炉版冰糖葫芦','京酱肉丝','老北京炸酱面','老北京炒三丁','炝锅面','西红柿鸡蛋肉丝面','宫廷鸡汤酱牛肉','北京烤鸭','涮羊肉','爆肚','卤煮火烧','炒肝','豆汁焦圈','门钉肉饼','艾窝窝','驴打滚','豌豆黄','糖卷果','它似蜜'] },
+];
+
+// ━━━ Build Cuisine Columns ━━━
+const cats = document.getElementById('cats');
+CUISINES.forEach((c, ci) => {
+  const col = document.createElement('div');
+  col.className = 'cat-col';
+  col.innerHTML = `<div class="cat-name">${c.name}</div><div class="cat-count">${c.count} 道</div>`;
+  const list = document.createElement('div');
+  list.className = 'dish-list';
+  const inner = document.createElement('div');
+  inner.className = 'dish-list-inner';
+  // duplicate for seamless scroll
+  const allDishes = [...c.dishes, ...c.dishes];
+  allDishes.forEach(d => {
+    const item = document.createElement('div');
+    item.className = 'dish-item';
+    item.textContent = d;
+    inner.appendChild(item);
+  });
+  list.appendChild(inner);
+  col.appendChild(list);
+  cats.appendChild(col);
+});
+
+// ━━━ Results ━━━
+const RESULTS = [
+  ['地三鲜','⭐ 推荐',true],['油焖茄子','简单',false],['凉拌茄子','快手',false],
+  ['土豆炖牛肉','硬菜',false],['酸辣土豆丝','经典',false],['土豆泥','西式',false],
+];
+const results = document.getElementById('results');
+RESULTS.forEach(([name, tag, hl]) => {
+  const el = document.createElement('div');
+  el.className = 'result-item';
+  el.innerHTML = `<span class="name${hl?' hl':''}">${name}</span><span class="tag${hl?' hl':''}">${tag}</span>`;
+  results.appendChild(el);
+});
+
+// ━━━ Scroll Animation ━━━
+let recipeScrolling = false;
+let cuisineScrolling = false;
+
+function startCuisineScroll() {
+  if (cuisineScrolling) return;
+  cuisineScrolling = true;
+  const lists = document.querySelectorAll('.dish-list');
+  lists.forEach((list, i) => {
+    const inner = list.querySelector('.dish-list-inner');
+    const speed = 0.3 + i * 0.08; // different speed per column
+    let offset = 0;
+    const totalH = inner.scrollHeight / 2;
+    function step() {
+      if (!cuisineScrolling) return;
+      offset += speed;
+      if (offset >= totalH) offset = 0;
+      inner.style.transform = `translateY(-${offset}px)`;
+      requestAnimationFrame(step);
+    }
+    step();
+  });
+}
+
+function stopCuisineScroll() { cuisineScrolling = false; }
+
+function startRecipeScroll() {
+  if (recipeScrolling) return;
+  recipeScrolling = true;
+  const el = document.getElementById('recipe-scroll');
+  el.scrollTop = 0;
+  let speed = 1.2;
+  function step() {
+    if (!recipeScrolling) return;
+    el.scrollTop += speed;
+    if (el.scrollTop >= el.scrollHeight - el.clientHeight) {
+      el.scrollTop = 0;
+    }
+    requestAnimationFrame(step);
+  }
+  step();
+}
+
+function stopRecipeScroll() { recipeScrolling = false; }
+
+// ━━━ Typing Animation ━━━
+let typingStarted = false;
+const TYPE_TEXT = '地三鲜怎么做？';
+const TYPE_CHARS = [...TYPE_TEXT]; // split into chars for proper CJK handling
+const TYPE_DURATION = 720; // total typing time in ms
+const typingEl = document.getElementById('typing-text');
+
+function runTyping() {
+  if (typingStarted) return;
+  typingStarted = true;
+  let charIndex = 0;
+  const interval = TYPE_DURATION / TYPE_CHARS.length;
+
+  function addChar() {
+    if (charIndex >= TYPE_CHARS.length) return;
+    typingEl.textContent += TYPE_CHARS[charIndex];
+    charIndex++;
+    if (charIndex < TYPE_CHARS.length) {
+      setTimeout(addChar, interval + Math.random() * 60 - 30);
+    }
+  }
+  addChar();
+}
+
+// ━━━ Animation Timeline ━━━
+const SCENES = [
+  { id: 's1', start: 0,     dur: 3500, on: runTyping, off: null },
+  { id: 's2', start: 3300,  dur: 4000, on: startCuisineScroll, off: stopCuisineScroll },
+  { id: 's3', start: 7100,  dur: 3200, on: null, off: null },
+  { id: 's4', start: 10100, dur: 5000, on: startRecipeScroll, off: stopRecipeScroll },
+  { id: 's5', start: 14900, dur: 2600, on: null, off: null },
+];
+
+const TOTAL = 17500;
+let t0 = null;
+let playing = false;
+let currentScene = null;
+
+function show(scene) {
+  // leave previous
+  if (currentScene && currentScene.off) currentScene.off();
+  document.querySelectorAll('.scene').forEach(s => s.classList.remove('active', 'on'));
+  const el = document.getElementById(scene.id);
+  if (el) {
+    el.classList.add('active');
+    requestAnimationFrame(() => el.classList.add('on'));
+  }
+  if (scene.on) scene.on();
+  currentScene = scene;
+}
+
+function tick(now) {
+  if (t0 === null) { t0 = now; window.__ready = true; }
+  const elapsed = now - t0;
+  if (playing) {
+    let next = null;
+    for (let i = SCENES.length - 1; i >= 0; i--) {
+      if (elapsed >= SCENES[i].start) { next = SCENES[i]; break; }
+    }
+    if (next && (!currentScene || currentScene.id !== next.id)) {
+      show(next);
+    }
+    if (elapsed >= TOTAL) {
+      if (window.__recording) { playing = false; return; }
+      t0 = now;
+      if (currentScene && currentScene.off) currentScene.off();
+      currentScene = null;
+      typingStarted = false;
+      typingEl.textContent = '';
+      document.querySelectorAll('.scene').forEach(s => s.classList.remove('active', 'on'));
+    }
+  }
+  requestAnimationFrame(tick);
+}
+
+document.fonts.ready.then(() => { playing = true; requestAnimationFrame(tick); });
+
+window.__seek = function(t) {
+  t0 = performance.now() - t;
+  if (currentScene && currentScene.off) currentScene.off();
+  currentScene = null;
+  document.querySelectorAll('.scene').forEach(s => s.classList.remove('active', 'on'));
+  playing = true;
+};
+</script>
+</body>
+</html>

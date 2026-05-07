@@ -1,0 +1,15 @@
+.DS_Store
+Thumbs.db
+*.swp
+node_modules/
+package-lock.json
+package.json
+playwright.config.ts
+e2e/
+tests/
+
+# Temp render files
+assets/.frames-*
+assets/.video-tmp-*
+assets/.palette-*
+SKILL.zip

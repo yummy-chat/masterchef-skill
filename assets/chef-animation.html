@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=1920, height=1080">
+<title>MasterChef Skill Animation</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@600;900&family=Noto+Sans+SC:wght@400;500;700&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+@font-face { font-family: 'MuYao'; src: url('muyao-handwriting.ttf') format('truetype'); }
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { background: #FBF7F0; overflow: hidden; font-family: 'Noto Sans SC', sans-serif; }
+
+.scene { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.4s ease; pointer-events: none; }
+.scene.active { opacity: 1; }
+
+/* ━━━ Scene 1: Typing ━━━ */
+#s1 { flex-direction: column; align-items: center; justify-content: center; }
+#s1 .typing-wrap { display: flex; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.4s ease; }
+#s1.on .typing-wrap { opacity: 1; }
+#s1 .typing-text { font-family: 'Noto Sans SC', sans-serif; font-size: 110px; font-weight: 700; color: #2C1810; line-height: 1.3; white-space: nowrap; border-right: 6px solid #C04A1A; padding-right: 8px; animation: blink-cursor 0.8s step-end infinite; }
+@keyframes blink-cursor { 0%,50% { border-color: #C04A1A; } 51%,100% { border-color: transparent; } }
+#s1 .typing-sub { font-family: 'Noto Sans SC', sans-serif; font-size: 34px; font-weight: 600; color: #8B7355; margin-top: 40px; opacity: 0; transform: translateY(20px); transition: opacity 0.6s ease, transform 0.6s ease; }
+#s1.on .typing-sub { opacity: 1; transform: translateY(0); transition-delay: 1s; }
+
+/* ━━━ Scene 2: Cuisine Categories ━━━ */
+#s2 { flex-direction: column; padding: 40px 80px; overflow: hidden; }
+#s2 .grid-title { font-size: 24px; font-weight: 700; color: #2C1810; margin-bottom: 24px; text-align: center; opacity: 0; transition: opacity 0.5s ease; flex-shrink: 0; }
+#s2.on .grid-title { opacity: 1; }
+#s2 .cats-wrap { display: grid; grid-template-columns: repeat(6, 1fr); gap: 24px; width: 100%; flex-shrink: 0; }
+.cat-col {}
+.cat-col .cat-name { font-size: 15px; font-weight: 700; color: #C04A1A; margin-bottom: 10px; padding-bottom: 6px; border-bottom: 2px solid #C04A1A; text-align: center; opacity: 0; transition: opacity 0.4s ease; }
+#s2.on .cat-name { opacity: 1; }
+.cat-col .cat-count { font-size: 12px; color: #8B7355; text-align: center; margin-bottom: 10px; opacity: 0; transition: opacity 0.4s ease 0.1s; }
+#s2.on .cat-count { opacity: 1; }
+.cat-col .dish-list { display: flex; flex-direction: column; gap: 6px; overflow: hidden; height: 680px; }
+.cat-col .dish-list-inner { display: flex; flex-direction: column; gap: 6px; }
+.cat-col .dish-item { font-size: 14px; font-weight: 400; padding: 6px 10px; border-radius: 8px; background: #F5EDE3; color: #2C1810; text-align: center; white-space: nowrap; }
+
+/* ━━━ Scene 3: Ingredient Search ━━━ */
+#s3 { gap: 80px; }
+.panel { background: #fff; border-radius: 16px; padding: 28px 36px; box-shadow: 0 4px 24px rgba(0,0,0,0.08); border: 2px solid #E8DDD0; opacity: 0; transform: translateX(30px); transition: opacity 0.5s ease, transform 0.5s ease; }
+.panel-left { transform: translateX(-30px); }
+#s3.on .panel { opacity: 1; transform: translateX(0); }
+.panel .label { font-size: 18px; font-weight: 500; color: #8B7355; margin-bottom: 16px; }
+.panel .query { font-size: 24px; color: #2C1810; }
+.panel .query em { color: #C04A1A; font-weight: 700; font-style: normal; }
+.result-item { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #E8DDD0; opacity: 0; transform: translateX(15px); transition: opacity 0.4s ease, transform 0.4s ease; }
+.result-item:last-child { border-bottom: none; }
+#s3.on .result-item { opacity: 1; transform: translateX(0); }
+.result-item .name { font-size: 18px; font-weight: 500; }
+.result-item .name.hl { color: #C04A1A; font-weight: 700; }
+.result-item .tag { font-size: 13px; padding: 4px 12px; border-radius: 20px; background: #E6D5C3; color: #8B7355; }
+.result-item .tag.hl { background: #C04A1A20; color: #C04A1A; }
+.arrow { font-size: 48px; color: #C04A1A; opacity: 0; transition: opacity 0.5s ease 0.15s; }
+#s3.on .arrow { opacity: 1; }
+
+/* ━━━ Scene 4: Full Recipe ━━━ */
+#s4 { }
+#s4 .recipe-frame { background: #fff; border-radius: 20px; box-shadow: 0 8px 40px rgba(0,0,0,0.1); border: 2px solid #E8DDD0; width: 860px; height: 860px; overflow: hidden; position: relative; }
+#s4 .recipe-scroll { padding: 48px 52px; overflow-y: auto; height: 100%; }
+#s4 .recipe-scroll::-webkit-scrollbar { width: 6px; }
+#s4 .recipe-scroll::-webkit-scrollbar-thumb { background: #D4C4B0; border-radius: 3px; }
+#s4 .recipe-scroll::-webkit-scrollbar-track { background: transparent; }
+#s4 .r-title { font-family: 'Noto Serif SC', serif; font-size: 36px; font-weight: 900; color: #2C1810; margin-bottom: 8px; }
+#s4 .r-meta { font-size: 15px; color: #8B7355; margin-bottom: 28px; }
+#s4 .r-section { font-size: 20px; font-weight: 700; color: #C04A1A; margin: 28px 0 14px; padding-bottom: 8px; border-bottom: 1px solid #E8DDD0; }
+#s4 .r-ingredient { font-size: 15px; color: #2C1810; padding: 5px 0; line-height: 1.6; }
+#s4 .r-step { font-size: 15px; color: #2C1810; padding: 8px 0; line-height: 1.7; }
+#s4 .r-step-num { display: inline-block; background: #C04A1A; color: #fff; width: 24px; height: 24px; border-radius: 50%; text-align: center; line-height: 24px; font-size: 13px; font-weight: 700; margin-right: 10px; }
+#s4 .r-note { font-size: 13px; color: #8B7355; margin: 4px 0 4px 34px; font-style: italic; }
+#s4 .r-health { font-size: 14px; color: #8B7355; margin-top: 24px; padding: 16px; background: #F5EDE3; border-radius: 12px; line-height: 1.6; }
+
+/* ━━━ Scene 5: End Card ━━━ */
+#s5 { flex-direction: column; }
+#s5 .logo { font-family: 'MuYao', cursive; font-size: 88px; color: #C04A1A; margin-bottom: 24px; line-height: 1.2; transform: scale(0.8); opacity: 0; transition: transform 0.6s cubic-bezier(0.34,1.56,0.64,1), opacity 0.5s ease; }
+#s5.on .logo { transform: scale(1); opacity: 1; }
+#s5 .tagline { font-size: 28px; font-weight: 500; color: #2C1810; margin-bottom: 40px; opacity: 0; transition: opacity 0.6s ease 0.2s; }
+#s5.on .tagline { opacity: 1; }
+#s5 .install { background: #C04A1A; color: #fff; padding: 14px 32px; border-radius: 10px; font-family: 'JetBrains Mono', monospace; font-size: 16px; font-weight: 500; opacity: 0; transform: translateY(10px); transition: opacity 0.5s ease 0.35s, transform 0.5s ease 0.35s; }
+#s5.on .install { opacity: 1; transform: translateY(0); }
+#s5 .contact { font-size: 15px; color: #8B7355; margin-top: 32px; opacity: 0; transition: opacity 0.5s ease 0.5s; }
+#s5.on .contact { opacity: 1; }
+</style>
+</head>
+<body>
+
+<!-- Scene 1: Typing -->
+<div class="scene" id="s1">
+  <div class="typing-wrap">
+    <div class="typing-text" id="typing-text"></div>
+  </div>
+  <div class="typing-sub">2,988 real recipes — not AI-generated</div>
+</div>
+
+<!-- Scene 2 -->
+<div class="scene" id="s2">
+  <div class="grid-title">95%+ Chinese cuisine · 6 major regional styles</div>
+  <div class="cats-wrap" id="cats"></div>
+</div>
+
+<!-- Scene 3 -->
+<div class="scene" id="s3">
+  <div class="panel panel-left">
+    <div class="label">You</div>
+    <div class="query">I have <em>eggplant</em> and <em>potato</em>, what can I cook?</div>
+  </div>
+  <div class="arrow">→</div>
+  <div class="panel">
+    <div class="label">MasterChef</div>
+    <div id="results"></div>
+  </div>
+</div>
+
+<!-- Scene 4 -->
+<div class="scene" id="s4">
+  <div class="recipe-frame">
+    <div class="recipe-scroll" id="recipe-scroll">
+      <div class="r-title">Di San Xian (地三鲜)</div>
+      <div class="r-meta">Northeast Chinese · Difficulty ⭐⭐⭐ · Season: All year</div>
+
+      <div class="r-section">Ingredients</div>
+      <div class="r-ingredient">🍆 Chinese eggplant 350g (cut into chunks)</div>
+      <div class="r-ingredient">🥔 Potato 250g (peeled, cut into thin chunks)</div>
+      <div class="r-ingredient">🌶️ Green pepper 100g (cut into chunks)</div>
+      <div class="r-ingredient">🧄 Garlic 40g (about 8 cloves, minced)</div>
+      <div class="r-ingredient">🧂 Soy sauce 30g (about 3 tbsp)</div>
+      <div class="r-ingredient">🦪 Oyster sauce 20g (about 2 tbsp)</div>
+      <div class="r-ingredient">🍯 Dark soy sauce 3g (for color)</div>
+      <div class="r-ingredient">🍬 Sugar 6g</div>
+      <div class="r-ingredient">🧂 MSG 3g (1 tsp)</div>
+      <div class="r-ingredient">🌾 Corn starch 5g (for sauce)</div>
+      <div class="r-ingredient">💧 Water 100g</div>
+      <div class="r-ingredient">🫒 Cooking oil (enough to submerge ingredients)</div>
+
+      <div class="r-section">Preparation</div>
+      <div class="r-step"><span class="r-step-num">1</span>Lightly dampen eggplant, dust with corn starch, shake to coat evenly</div>
+      <div class="r-note">Coating reduces oil absorption</div>
+      <div class="r-step"><span class="r-step-num">2</span>Cut potato into thin chunks, pepper into chunks</div>
+      <div class="r-step"><span class="r-step-num">3</span>Mince 8 cloves of garlic</div>
+      <div class="r-step"><span class="r-step-num">4</span>Mix soy sauce, oyster sauce, dark soy, sugar, MSG, corn starch and water in a small bowl</div>
+
+      <div class="r-section">Cooking</div>
+      <div class="r-step"><span class="r-step-num">1</span>Heat oil until hot, fry potato chunks for ~4 min until golden and cooked through</div>
+      <div class="r-note">Turn to medium heat when large bubbles appear</div>
+      <div class="r-step"><span class="r-step-num">2</span>Remove potato, raise heat. Fry eggplant ~3 min until golden on all sides</div>
+      <div class="r-note">Don't stir immediately after adding eggplant</div>
+      <div class="r-step"><span class="r-step-num">3</span>Quickly flash-fry pepper in residual oil, remove immediately</div>
+      <div class="r-step"><span class="r-step-num">4</span>Leave a little oil, sauté 1/3 garlic with residual heat, pour in sauce, bring to bubble</div>
+      <div class="r-step"><span class="r-step-num">5</span>Add potato, eggplant and pepper, toss quickly to coat</div>
+      <div class="r-step"><span class="r-step-num">6</span>Turn off heat, add remaining 2/3 raw garlic, toss gently and serve</div>
+      <div class="r-note">Raw garlic at the end is the soul of this dish</div>
+
+      <div class="r-section">Health Tips</div>
+      <div class="r-health">Eggplant absorbs significant oil. Serve with whole grain rice or light soup to balance. Rich in vitamin C and potassium. Control frying time to minimize acrylamide.</div>
+    </div>
+  </div>
+</div>
+
+<!-- Scene 5 -->
+<div class="scene" id="s5">
+  <div class="logo">🍳 masterchef.skill</div>
+  <div class="tagline">Practical home cooking recipes for AI Agents</div>
+  <div class="install">npx skills add yummy-chat/masterchef-skill</div>
+  <div class="contact">recipe@yummy.chat</div>
+</div>
+
+<script>
+// ━━━ Cuisine Data ━━━
+const CUISINES = [
+  { name: 'Home Style', count: 1291, dishes: ['Egg Fried Rice','Tomato Egg Stir-fry','Potato Beef Stew','Garlic Broccoli','Pepper Pork','Hot & Sour Cabbage','Braised Eggplant','Sautéed Pork','Chestnut Chicken','Black Sesame Soup','Cold Eggplant','Spicy Pork','Red Braised Pork','Sweet & Sour Ribs','Kung Pao Chicken','Yu Xiang Pork','Twice-cooked Pork','Pickled Fish','Boiled Fish','Mapo Tofu','Cola Chicken Wings','Corn Pork Rib Soup','Honey Yam','Shrimp Dumplings'] },
+  { name: 'Cantonese', count: 319, dishes: ['Beef Brisket Noodle','Seafood Fried Rice','Double-skin Milk','Wonton Noodle','Offal Rice Noodle','Curry Beef Brisket','Claypot Shrimp','Soy Sauce Shrimp','Steamed Chicken','White Cut Chicken','Claypot Rice','Sweet & Sour Pork','Steamed Ribs','Shrimp Dumpling','Roast Goose','BBQ Pork Bun','Rice Roll','Mei Cai Pork','Dry-fried Beef Noodle','Turnip Cake'] },
+  { name: 'Sichuan', count: 246, dishes: ['Yu Xiang Pork','Mala Hot Pot','Dry-fried Beans','Spicy Chicken','Boiled Beef','Mao Xue Wang','Twice-cooked Pork','Pickled Pepper Chicken','Garlic Pork','Couple\'s Lung Slices','Dan Dan Noodle','Bobo Chicken','Mapo Tofu','Mouth-watering Chicken','Sweet Water Noodle','Mao Cai','Sichuan Cold Jelly','Crispy Rice Pork'] },
+  { name: 'Northeast', count: 142, dishes: ['Sautéed Pork','Rib Bean Stew','Guo Bao Rou','Pork Sauerkraut','Di San Xian','Chicken Mushroom','Pork Vermicelli','Sauerkraut Pork','Iron Pot Goose','Candied Sweet Potato','Braised Bones','"Kill Pig" Stew','Sticky Bean Bun','Sauerkraut Dumpling','Dongbei Stew','Glass Noodle','Grilled Cold Noodle'] },
+  { name: 'Shaanxi', count: 70, dishes: ['Cold Skin Noodle','Shaanxi Noodle','Hot Oil Noodle','Tofu Pudding','Roujiamo','Liangpi','Lamb Pao Mo','Qishan Noodle','Biangbiang Noodle','Zenggao','Buckwheat Noodle','Water Basin Lamb','Potato Shreds','Shaanxi Stew','Thousand-layer Cake'] },
+  { name: 'Beijing', count: 49, dishes: ['Palace Beef','Zhajiang Noodle','Candied Hawthorn','Jing Jiang Pork','Old Beijing Stir-fry','Beijing Roast Duck','Instant-boiled Mutton','Quick-boiled Tripe','Luzhu Huoshao','Chao Gan','Douzhi Jiaoquan','Rolling Donkey','Pea Cake','Sugar Roll'] },
+];
+
+// ━━━ Build Cuisine Columns ━━━
+const cats = document.getElementById('cats');
+CUISINES.forEach((c) => {
+  const col = document.createElement('div');
+  col.className = 'cat-col';
+  col.innerHTML = `<div class="cat-name">${c.name}</div><div class="cat-count">${c.count} dishes</div>`;
+  const list = document.createElement('div');
+  list.className = 'dish-list';
+  const inner = document.createElement('div');
+  inner.className = 'dish-list-inner';
+  const allDishes = [...c.dishes, ...c.dishes];
+  allDishes.forEach(d => {
+    const item = document.createElement('div');
+    item.className = 'dish-item';
+    item.textContent = d;
+    inner.appendChild(item);
+  });
+  list.appendChild(inner);
+  col.appendChild(list);
+  cats.appendChild(col);
+});
+
+// ━━━ Results ━━━
+const RESULTS = [
+  ['Di San Xian','⭐ Top Pick',true],['Braised Eggplant','Easy',false],['Cold Eggplant Salad','Quick',false],
+  ['Potato Beef Stew','Hearty',false],['Hot & Sour Shredded Potato','Classic',false],['Mashed Potato','Western',false],
+];
+const results = document.getElementById('results');
+RESULTS.forEach(([name, tag, hl]) => {
+  const el = document.createElement('div');
+  el.className = 'result-item';
+  el.innerHTML = `<span class="name${hl?' hl':''}">${name}</span><span class="tag${hl?' hl':''}">${tag}</span>`;
+  results.appendChild(el);
+});
+
+// ━━━ Scroll Animation ━━━
+let recipeScrolling = false;
+let cuisineScrolling = false;
+
+function startCuisineScroll() {
+  if (cuisineScrolling) return;
+  cuisineScrolling = true;
+  document.querySelectorAll('.dish-list').forEach((list, i) => {
+    const inner = list.querySelector('.dish-list-inner');
+    const speed = 0.3 + i * 0.08;
+    let offset = 0;
+    const totalH = inner.scrollHeight / 2;
+    (function step() {
+      if (!cuisineScrolling) return;
+      offset += speed;
+      if (offset >= totalH) offset = 0;
+      inner.style.transform = `translateY(-${offset}px)`;
+      requestAnimationFrame(step);
+    })();
+  });
+}
+function stopCuisineScroll() { cuisineScrolling = false; }
+
+function startRecipeScroll() {
+  if (recipeScrolling) return;
+  recipeScrolling = true;
+  const el = document.getElementById('recipe-scroll');
+  el.scrollTop = 0;
+  (function step() {
+    if (!recipeScrolling) return;
+    el.scrollTop += 1.2;
+    if (el.scrollTop >= el.scrollHeight - el.clientHeight) el.scrollTop = 0;
+    requestAnimationFrame(step);
+  })();
+}
+function stopRecipeScroll() { recipeScrolling = false; }
+
+// ━━━ Typing Animation ━━━
+let typingStarted = false;
+const TYPE_TEXT = 'How to make Di San Xian?';
+const TYPE_CHARS = [...TYPE_TEXT];
+const TYPE_DURATION = 900;
+const typingEl = document.getElementById('typing-text');
+
+function runTyping() {
+  if (typingStarted) return;
+  typingStarted = true;
+  let charIndex = 0;
+  const interval = TYPE_DURATION / TYPE_CHARS.length;
+  function addChar() {
+    if (charIndex >= TYPE_CHARS.length) return;
+    typingEl.textContent += TYPE_CHARS[charIndex];
+    charIndex++;
+    if (charIndex < TYPE_CHARS.length) setTimeout(addChar, interval + Math.random() * 60 - 30);
+  }
+  addChar();
+}
+
+// ━━━ Animation Timeline ━━━
+const SCENES = [
+  { id: 's1', start: 0,     dur: 3500, on: runTyping, off: null },
+  { id: 's2', start: 3300,  dur: 4000, on: startCuisineScroll, off: stopCuisineScroll },
+  { id: 's3', start: 7100,  dur: 3200, on: null, off: null },
+  { id: 's4', start: 10100, dur: 5000, on: startRecipeScroll, off: stopRecipeScroll },
+  { id: 's5', start: 14900, dur: 2600, on: null, off: null },
+];
+
+const TOTAL = 17500;
+let t0 = null;
+let playing = false;
+let currentScene = null;
+
+function show(scene) {
+  if (currentScene && currentScene.off) currentScene.off();
+  document.querySelectorAll('.scene').forEach(s => s.classList.remove('active', 'on'));
+  const el = document.getElementById(scene.id);
+  if (el) { el.classList.add('active'); requestAnimationFrame(() => el.classList.add('on')); }
+  if (scene.on) scene.on();
+  currentScene = scene;
+}
+
+function tick(now) {
+  if (t0 === null) { t0 = now; window.__ready = true; }
+  const elapsed = now - t0;
+  if (playing) {
+    let next = null;
+    for (let i = SCENES.length - 1; i >= 0; i--) {
+      if (elapsed >= SCENES[i].start) { next = SCENES[i]; break; }
+    }
+    if (next && (!currentScene || currentScene.id !== next.id)) show(next);
+    if (elapsed >= TOTAL) {
+      if (window.__recording) { playing = false; return; }
+      t0 = now;
+      if (currentScene && currentScene.off) currentScene.off();
+      currentScene = null;
+      typingStarted = false;
+      typingEl.textContent = '';
+      document.querySelectorAll('.scene').forEach(s => s.classList.remove('active', 'on'));
+    }
+  }
+  requestAnimationFrame(tick);
+}
+
+document.fonts.ready.then(() => { playing = true; requestAnimationFrame(tick); });
+window.__seek = function(t) { t0 = performance.now() - t; if (currentScene && currentScene.off) currentScene.off(); currentScene = null; document.querySelectorAll('.scene').forEach(s => s.classList.remove('active', 'on')); playing = true; };
+</script>
+</body>
+</html>
