@@ -17,8 +17,27 @@ Practical home cooking recipes for AI Agents, featuring 2,988 dishes (95%+ Chine
 
 ## Installation
 
+### Method 1: via npx (Recommended)
+
 ```bash
 npx skills add yummy-chat/masterchef-skill
+```
+
+### Method 2: via SkillHub (for Agents)
+
+**Check if SkillHub is installed:**
+```bash
+skillhub --version
+```
+
+**If not installed**, install SkillHub CLI first (CLI only, no GUI):
+```bash
+curl -fsSL https://skillhub.cn/install/skillhub.md | bash
+```
+
+**Then install masterchef skill:**
+```bash
+skillhub install masterchef
 ```
 
 ---
