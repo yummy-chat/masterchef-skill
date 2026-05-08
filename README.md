@@ -10,6 +10,10 @@ Practical home cooking recipes for AI Agents, featuring 2,988 dishes (95%+ Chine
 </p>
 
 <p align="center">
+<img src="photo/1640_di-san-xian.jpg" alt="Di San Xian (地三鲜) — Sautéed Eggplant, Potato & Pepper" width="640">
+</p>
+
+<p align="center">
 <img src="assets/chef-animation.gif" alt="Demo animation" width="960">
 </p>
 
